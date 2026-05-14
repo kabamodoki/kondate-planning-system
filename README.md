@@ -18,6 +18,7 @@ AIが1週間分の献立を自動で提案してくれるWebアプリです。
 - **再生成** — 気に入らない料理だけ1コマ単位でやり直し
 - **買い物リスト** — 献立からカテゴリ別に食材を自動集計
 - **履歴管理** — 過去の献立を保存・復元・削除
+- **みんなの献立** — 他ユーザーが生成した献立を閲覧（タグ付き）
 - **レシピリンク** — クックパッド / クラシルへの検索リンク
 - **画像表示** — Unsplash API連携（オプション）
 
@@ -28,10 +29,10 @@ AIが1週間分の献立を自動で提案してくれるWebアプリです。
 ```
 ユーザー
   ↓
-Vercel（フロントエンド）
+Vercel（Next.js フロントエンド）
   https://kondate-planning-system.vercel.app/
-  ↓ API通信
-Render（バックエンド）
+  ↓ /api/* プロキシ（API シークレットを付与）
+Render（FastAPI バックエンド）
   https://kondate-planning-system.onrender.com/
   ↓ AI生成
 Google Gemini API（gemini-2.5-flash）
@@ -41,7 +42,7 @@ Google Gemini API（gemini-2.5-flash）
 |--------|---------|------|
 | フロントエンド | [Vercel](https://vercel.com) Hobby プラン | 無料 |
 | バックエンド | [Render](https://render.com) Free プラン | 無料 |
-| AI | Google Gemini API 無料枠 | 無料 |
+| AI | Google Gemini API（従量課金） | 利用量に応じて発生 |
 
 > **注意**: Render の無料プランはアクセスがない状態が15分続くとスリープします。
 > 次のアクセス時に起動まで約30秒かかる場合があります。
@@ -64,7 +65,7 @@ Google Gemini API（gemini-2.5-flash）
 ### 必要なもの
 
 - Docker Desktop
-- Google Gemini API キー（無料）→ https://aistudio.google.com/apikey
+- Google Gemini API キー → https://aistudio.google.com/apikey
 
 ### 手順
 
@@ -101,7 +102,9 @@ docker compose up -d
 | 変数名 | 必須 | 説明 |
 |--------|------|------|
 | `GEMINI_API_KEY` | ✅ | Google Gemini API キー |
-| `NEXT_PUBLIC_API_URL` | ✅ | バックエンドURL（ローカル: `http://localhost:8000`） |
+| `GEMINI_MODEL` | ー | 使用モデル（デフォルト: `gemini-2.5-flash`） |
+| `API_SECRET` | ー | フロント→バックエンド間の認証キー（本番環境推奨） |
+| `API_URL` | ー | バックエンドURL（Vercel側に設定: `https://your-backend.onrender.com`） |
 | `NEXT_PUBLIC_UNSPLASH_ACCESS_KEY` | ー | Unsplash API キー（画像表示用・任意） |
 
 ---

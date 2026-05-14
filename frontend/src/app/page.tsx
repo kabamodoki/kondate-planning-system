@@ -6,6 +6,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import ErrorBanner from "@/components/ErrorBanner";
+import UsageBanner from "@/components/UsageBanner";
 
 const MEAL_COLOR: Record<MealType, { on: string; off: string; dot: string }> = {
   breakfast: { on: "bg-amber-100 border-amber-400 text-amber-800", off: "bg-white border-warm-200 text-warm-300", dot: "bg-amber-400" },
@@ -60,11 +61,7 @@ export default function HomePage() {
           <p className="text-warm-500 text-sm">作りたい食事を選ぶだけ。AIが美味しい1週間を提案します。</p>
         </div>
 
-        {/* 利用上の注意 */}
-        <div className="bg-warm-100 border border-warm-200 rounded-xl px-4 py-3 mb-6 text-xs text-warm-600 space-y-1">
-          <p>⚠️ 無料枠のAIを利用しているため、混雑時に献立の生成ができない場合があります。</p>
-          <p>🕐 サーバーがスリープ中の場合、初回の生成に30秒〜1分ほどかかることがあります。</p>
-        </div>
+        <UsageBanner />
 
         {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 

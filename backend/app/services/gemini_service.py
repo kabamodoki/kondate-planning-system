@@ -15,7 +15,7 @@ from app.prompts.meal_plan_prompts import (
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 genai.configure(api_key=GEMINI_API_KEY)
 
@@ -62,7 +62,7 @@ def generate_week_plan(
     meal_selection: MealSelection,
     forbidden_ingredients: list[str] | None = None,
     preferences: str = "",
-) -> MealPlan:
+) -> tuple[MealPlan, dict]:
     sel_dict = {
         day: {
             "breakfast": getattr(getattr(meal_selection, day), "breakfast"),
@@ -75,6 +75,13 @@ def generate_week_plan(
     prompt = build_week_plan_prompt(servings, sel_dict, forbidden_ingredients, preferences)
     data = _parse_json_with_retry(prompt)
 
+    # AIが生成したタグを取得（失敗時は空配列でフォールバック）
+    raw_tags = data.get("tags", {})
+    tags = {
+        "forbidden": [str(t) for t in raw_tags.get("forbidden", []) if t],
+        "preferences": [str(t) for t in raw_tags.get("preferences", []) if t],
+    }
+
     day_meals = {}
     for day in DAY_KEYS:
         day_data = data.get(day, {})
@@ -85,7 +92,7 @@ def generate_week_plan(
             dinner=Meal(**day_data["dinner"]) if day_sel["dinner"] and "dinner" in day_data else None,
         )
 
-    return MealPlan(**day_meals)
+    return MealPlan(**day_meals), tags
 
 
 def regenerate_meal(day: str, meal_type: str, servings: int, current_plan: MealPlan) -> Meal:

@@ -32,8 +32,7 @@ export function useMealPlan() {
       setCurrentPlan(plan);
       return plan;
     } catch (e: unknown) {
-      const err = e as { detail?: { message?: string } };
-      setError(err?.detail?.message ?? "献立の生成に失敗しました。");
+      setError(toUserMessage(e));
       return null;
     } finally {
       setLoading(false);
@@ -56,14 +55,29 @@ export function useMealPlan() {
       };
       setCurrentPlan(updated);
     } catch (e: unknown) {
-      const err = e as { detail?: { message?: string } };
-      setError(err?.detail?.message ?? "再生成に失敗しました。");
+      setError(toUserMessage(e));
     } finally {
       setRegeneratingKey(null);
     }
   };
 
   return { currentPlan, setCurrentPlan, loading, regeneratingKey, error, setError, generate, regenerate };
+}
+
+type ApiError = { status?: number; detail?: { error?: string; message?: string } | string };
+
+function toUserMessage(e: unknown): string {
+  const err = e as ApiError;
+  const detail = typeof err.detail === "object" ? err.detail : null;
+  switch (detail?.error) {
+    case "ip_limit_exceeded":
+    case "budget_exceeded":
+      return detail.message ?? "ただいまご利用いただけません。";
+    case "gemini_unavailable":
+      return "ただいまAIサービスが利用できません。しばらくしてからお試しください。";
+    default:
+      return "献立の生成に失敗しました。もう一度お試しください。";
+  }
 }
 
 function getMonday(): string {

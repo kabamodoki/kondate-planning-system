@@ -46,7 +46,15 @@ def build_week_plan_prompt(
     selection_text = "\n".join(selection_lines) if selection_lines else "なし"
 
     import json
-    format_example = json.dumps(format_parts, ensure_ascii=False, indent=2)
+    # tagsフィールドを先頭に追加したフォーマット
+    format_with_tags = {
+        "tags": {
+            "forbidden": ["食材名1", "食材名2"],
+            "preferences": ["タグ1", "タグ2"],
+        },
+        **format_parts,
+    }
+    format_example = json.dumps(format_with_tags, ensure_ascii=False, indent=2)
 
     forbidden_section = ""
     if forbidden_ingredients:
@@ -70,6 +78,14 @@ def build_week_plan_prompt(
 - 朝食はシンプルなもの（5〜10分で作れる程度）
 - 昼食・夕食はやや充実したもの
 {forbidden_section}{preferences_section}
+【タグ生成ルール（出力JSONの "tags" フィールド）】
+- "tags.forbidden": 禁止食材の入力から食材名のみを抽出して配列にする
+  例: 「卵アレルギー」→「卵」、「乳製品は使わないで」→「乳製品」、「ナッツ類NG」→「ナッツ」
+  食材でない語・修飾語は除外する。禁止食材の入力がない場合は空配列 []。
+- "tags.preferences": 好み・スタイルの入力から食に関連する短いキーワードのみ抽出して配列にする
+  例: 「和食中心でお願いします」→「和食中心」、「なるべくヘルシーに」→「ヘルシー」、「魚料理を週3回以上」→「魚多め」
+  食材・調理スタイルと無関係な語（「お願いします」「なるべく」等）は除外する。好みの入力がない場合は空配列 []。
+
 【出力形式（JSON のみ・説明文不要・生成対象の食事のみ含める）】
 {format_example}"""
 

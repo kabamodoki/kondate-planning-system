@@ -19,6 +19,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <nav className="flex items-center gap-1">
               <Link
+                href="/community"
+                className="text-sm text-warm-500 hover:text-terra px-3 py-1.5 rounded-lg hover:bg-terra-light transition-colors no-underline"
+              >
+                みんなの献立
+              </Link>
+              <Link
                 href="/history"
                 className="text-sm text-warm-500 hover:text-terra px-3 py-1.5 rounded-lg hover:bg-terra-light transition-colors no-underline"
               >
