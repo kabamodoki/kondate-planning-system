@@ -34,6 +34,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <footer className="mt-16 border-t border-warm-100 bg-white/60 py-6 text-center">
           <div id="ad-slot" className="min-h-8 mb-2" />
+          <div className="flex items-center justify-center gap-4 mb-1">
+            <Link href="/terms" className="text-xs text-warm-300 hover:text-terra transition-colors no-underline">
+              利用規約
+            </Link>
+            <a
+              href="https://github.com/kabamodoki/kondate-planning-system"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-warm-300 hover:text-terra transition-colors no-underline"
+            >
+              GitHub
+            </a>
+          </div>
           <p className="text-xs text-warm-300">© 2026 こんだて帖</p>
         </footer>
       </body>
