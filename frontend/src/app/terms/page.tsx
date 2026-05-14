@@ -50,7 +50,16 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-warm-900 mb-2">5. 規約の変更</h2>
+          <h2 className="font-bold text-warm-900 mb-2">5. 広告・アフィリエイトについて</h2>
+          <p>
+            本サービスは、Amazonアソシエイト・プログラムおよびその他のアフィリエイトプログラムに参加しています。
+            本サービス内に表示されるリンクの一部はアフィリエイトリンクであり、リンク経由でご購入いただいた場合に運営者が報酬を受け取ることがあります。
+            お客様の購入価格には影響しません。「PR」「Amazon PR」と表記されているリンクがアフィリエイトリンクです。
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-warm-900 mb-2">6. 規約の変更</h2>
           <p>
             本規約は予告なく変更する場合があります。変更後も本サービスを利用した場合、変更後の規約に同意したものとみなします。
           </p>

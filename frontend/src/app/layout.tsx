@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AffiliateBanner from "@/components/AffiliateBanner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
 
         <footer className="mt-16 border-t border-warm-100 bg-white/60 py-6 text-center">
-          <div id="ad-slot" className="min-h-8 mb-2" />
+          <AffiliateBanner />
           <div className="flex items-center justify-center gap-4 mb-1">
             <Link href="/terms" className="text-xs text-warm-300 hover:text-terra transition-colors no-underline">
               利用規約
