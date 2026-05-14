@@ -1,7 +1,8 @@
 import json
 import os
+import time
 import google.generativeai as genai
-from google.api_core.exceptions import GoogleAPIError
+from google.api_core.exceptions import GoogleAPIError, ResourceExhausted
 
 from app.models.schemas import MealPlan, MealSelection, DayMeals, Meal
 from app.prompts.meal_plan_prompts import (
@@ -14,7 +15,7 @@ from app.prompts.meal_plan_prompts import (
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
 genai.configure(api_key=GEMINI_API_KEY)
 
@@ -29,8 +30,15 @@ _model = genai.GenerativeModel(
 
 
 def _call_gemini(prompt: str) -> str:
-    response = _model.generate_content(prompt)
-    return response.text
+    for attempt in range(3):
+        try:
+            response = _model.generate_content(prompt)
+            return response.text
+        except ResourceExhausted as e:
+            if attempt < 2:
+                time.sleep(15 * (attempt + 1))
+            else:
+                raise GoogleAPIError(str(e)) from e
 
 
 def _parse_json_with_retry(prompt: str) -> dict:
