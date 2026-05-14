@@ -16,17 +16,19 @@ export function useMealPlan() {
     mealSelection: MealSelection,
     forbiddenIngredients: string[],
     preferences: string,
+    budget?: number,
   ) => {
     setLoading(true);
     setError(null);
     try {
-      const { meal_plan } = await api.generateMealPlan(servings, mealSelection, forbiddenIngredients, preferences);
+      const { meal_plan } = await api.generateMealPlan(servings, mealSelection, forbiddenIngredients, preferences, budget);
       const plan: MealPlan = {
         id: uuidv4(),
         createdAt: new Date().toISOString(),
         weekStart: getMonday(),
         servings,
         mealSelection,
+        budget: budget || undefined,
         meals: meal_plan,
       };
       setCurrentPlan(plan);

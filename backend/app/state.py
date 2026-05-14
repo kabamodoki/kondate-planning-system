@@ -56,10 +56,10 @@ def check_and_consume_ip(ip: str, action: str) -> bool:
 # ── 結果キャッシュ ────────────────────────────────────
 _cache: dict[str, dict] = {}
 
-def build_cache_key(servings: int, meal_selection: dict, forbidden: list[str], preferences: str) -> str:
-    has_restrictions = bool(forbidden) or bool(preferences.strip())
+def build_cache_key(servings: int, meal_selection: dict, forbidden: list[str], preferences: str, budget: int | None = None) -> str:
+    has_restrictions = bool(forbidden) or bool(preferences.strip()) or budget is not None
     if has_restrictions:
-        key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}:{sorted(forbidden)}:{preferences.strip()}"
+        key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}:{sorted(forbidden)}:{preferences.strip()}:{budget}"
     else:
         key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}"
     return hashlib.sha256(key_data.encode()).hexdigest()

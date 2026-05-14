@@ -25,6 +25,7 @@ def build_week_plan_prompt(
     meal_selection: dict,
     forbidden_ingredients: list[str] | None = None,
     preferences: str = "",
+    budget: int | None = None,
 ) -> str:
     """選択された食事のみ生成するプロンプトを構築する。"""
     selection_lines = []
@@ -36,7 +37,7 @@ def build_week_plan_prompt(
         if selected:
             selection_lines.append(f"- {DAY_JP[day]}: {' / '.join(MEAL_JP[m] for m in selected)}")
             format_parts[day] = {
-                m: {"name": "料理名", "description": "短い説明", "ingredients": [{"name": "食材名", "amount": "分量"}]}
+                m: {"name": "料理名", "description": "短い説明", "estimated_cost": 300, "ingredients": [{"name": "食材名", "amount": "分量"}]}
                 for m in selected
             }
 
@@ -62,6 +63,10 @@ def build_week_plan_prompt(
     if preferences.strip():
         preferences_section = f"\n【好み・スタイル】\n{preferences.strip()}\n"
 
+    budget_section = ""
+    if budget:
+        budget_section = f"\n【予算】1週間の食費目安は{budget}円以内（{servings}人分）。この範囲に収まるよう食材費を意識した料理を選ぶこと。\n"
+
     return f"""条件に従い指定の食事のみ生成。
 
 【生成対象】{selection_text}
@@ -70,7 +75,8 @@ def build_week_plan_prompt(
 - {servings}人分・直近3日以内に同じ料理名不可・和洋中バランス
 - 日本のスーパーで買える食材・朝食は5〜10分で作れるシンプルな料理
 - description は15文字以内の短い説明
-{forbidden_section}{preferences_section}
+- estimated_costには{servings}人分の1食あたりの食材費目安を円の整数で入力（一般的なスーパーの価格帯）
+{forbidden_section}{preferences_section}{budget_section}
 【タグ生成ルール（出力JSONの "tags" フィールド）】
 - "tags.forbidden": 禁止食材の入力から食材名のみを抽出して配列にする
   例: 「卵アレルギー」→「卵」、「乳製品は使わないで」→「乳製品」、「ナッツ類NG」→「ナッツ」
@@ -87,7 +93,7 @@ REGENERATE_MEAL_TEMPLATE = """{day}の{meal_type}を1つ生成。
 
 【除外（直近3日以内）】{already_used_dishes}
 
-【条件】除外リスト以外・日本の家庭料理・{meal_type}に適したもの・description は15文字以内
+【条件】除外リスト以外・日本の家庭料理・{meal_type}に適したもの・description は15文字以内・estimated_costは{servings}人分の食材費目安（円・整数）
 
 【出力（JSON のみ）】
-{{"name":"料理名","description":"短い説明","ingredients":[{{"name":"食材名","amount":"分量"}}]}}"""
+{{"name":"料理名","description":"短い説明","estimated_cost":300,"ingredients":[{{"name":"食材名","amount":"分量"}}]}}"""

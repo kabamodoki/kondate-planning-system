@@ -80,6 +80,9 @@ export default function MealCard({ meal, label, isRegenerating, onRegenerate }: 
           <div className="p-3">
             <p className="font-bold text-sm text-warm-900 mb-1 leading-tight">{meal.name}</p>
             <p className="text-xs text-warm-500 mb-2 leading-relaxed line-clamp-2">{meal.description}</p>
+            {meal.estimated_cost != null && (
+              <p className="text-xs text-warm-400 mb-2">食材費目安 ¥{meal.estimated_cost.toLocaleString()}</p>
+            )}
             <ul className="text-xs text-warm-700 space-y-0.5 mb-3">
               {meal.ingredients.slice(0, 3).map((ing, i) => (
                 <li key={i} className="flex gap-1">

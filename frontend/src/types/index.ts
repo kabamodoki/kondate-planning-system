@@ -6,6 +6,7 @@ export interface Ingredient {
 export interface Meal {
   name: string;
   description: string;
+  estimated_cost?: number;
   ingredients: Ingredient[];
 }
 
@@ -30,6 +31,7 @@ export interface MealPlan {
   weekStart: string;
   servings: number;
   mealSelection: MealSelection;
+  budget?: number;
   meals: {
     monday: DayMeals;
     tuesday: DayMeals;

@@ -26,7 +26,7 @@ async def generate_meal_plan(req: GenerateMealPlanRequest, request: Request):
     sel_dict = req.meal_selection.model_dump()
 
     # Cache check first — no IP/budget consumed on hit
-    cache_key = state.build_cache_key(req.servings, sel_dict, req.forbidden_ingredients, req.preferences)
+    cache_key = state.build_cache_key(req.servings, sel_dict, req.forbidden_ingredients, req.preferences, req.budget)
     cached = state.get_cache(cache_key)
     if cached:
         return GenerateMealPlanResponse(**cached)
@@ -51,6 +51,7 @@ async def generate_meal_plan(req: GenerateMealPlanRequest, request: Request):
             meal_selection=req.meal_selection,
             forbidden_ingredients=req.forbidden_ingredients,
             preferences=req.preferences,
+            budget=req.budget,
         )
         response = GenerateMealPlanResponse(meal_plan=meal_plan)
 

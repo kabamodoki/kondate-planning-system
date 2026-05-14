@@ -20,6 +20,7 @@ export default function HomePage() {
   const [mealSelection, setMealSelection] = useLocalStorage<MealSelection>("kondate_meal_selection", DEFAULT_MEAL_SELECTION);
   const [forbiddenIngredients, setForbiddenIngredients] = useLocalStorage<string>("kondate_forbidden", "");
   const [preferences, setPreferences] = useLocalStorage<string>("kondate_preferences", "");
+  const [budget, setBudget] = useLocalStorage<number>("kondate_budget", 0);
   const [history] = useLocalStorage<MealPlan[]>("kondate_history", []);
   const { loading, error, setError, generate } = useMealPlan();
 
@@ -39,7 +40,7 @@ export default function HomePage() {
       .split(/[、,，\n]/)
       .map((s) => s.trim())
       .filter(Boolean);
-    const plan = await generate(servings, mealSelection, forbidden, preferences);
+    const plan = await generate(servings, mealSelection, forbidden, preferences, budget || undefined);
     if (plan) {
       try { localStorage.setItem("kondate_current", JSON.stringify(plan)); } catch {/* ignore */}
       router.push("/meal-plan");
@@ -198,6 +199,22 @@ export default function HomePage() {
               rows={3}
               className="input-base resize-none"
             />
+          </div>
+          <div>
+            <label className="block font-bold text-warm-900 mb-2 text-sm">
+              💰 週の食費予算（任意）
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={budget || ""}
+                onChange={(e) => setBudget(e.target.value ? Number(e.target.value) : 0)}
+                placeholder="例: 5000"
+                min={0}
+                className="input-base w-36"
+              />
+              <span className="text-sm text-warm-500">円 / 週</span>
+            </div>
           </div>
         </div>
 

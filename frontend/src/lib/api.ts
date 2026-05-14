@@ -27,6 +27,7 @@ export async function generateMealPlan(
   mealSelection: MealSelection,
   forbiddenIngredients: string[],
   preferences: string,
+  budget?: number,
 ): Promise<{ meal_plan: MealPlan["meals"] }> {
   return request("/api/meal-plan/generate", {
     method: "POST",
@@ -35,6 +36,7 @@ export async function generateMealPlan(
       meal_selection: mealSelection,
       forbidden_ingredients: forbiddenIngredients,
       preferences,
+      budget: budget || null,
     }),
   });
 }

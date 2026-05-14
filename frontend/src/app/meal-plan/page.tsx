@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MealPlan, DayKey, MealType } from "@/types";
+import { MealPlan, DayKey, MealType, DAY_KEYS, MEAL_TYPES } from "@/types";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import MealPlanCalendar from "@/components/MealPlanCalendar";
@@ -53,6 +53,12 @@ export default function MealPlanPage() {
     return <p className="text-warm-400 text-center py-16">読み込み中...</p>;
   }
 
+  const totalCost = DAY_KEYS.reduce((sum, day) =>
+    sum + MEAL_TYPES.reduce((s, m) => s + (currentPlan.meals[day][m]?.estimated_cost ?? 0), 0), 0
+  );
+  const hasCostData = totalCost > 0;
+  const overBudget = currentPlan.budget ? totalCost > currentPlan.budget : false;
+
   return (
     <div>
       {/* ナビゲーションバー */}
@@ -67,6 +73,13 @@ export default function MealPlanPage() {
           <div>
             <h2 className="text-xl font-extrabold text-warm-900">今週の献立 🍽️</h2>
             <p className="text-xs text-warm-400 mt-0.5">{currentPlan.servings}人分 · {currentPlan.weekStart}〜</p>
+            {hasCostData && (
+              <p className={`text-xs mt-1 ${overBudget ? "text-red-400" : "text-warm-400"}`}>
+                食材費目安 約 ¥{totalCost.toLocaleString()}
+                {currentPlan.budget ? ` / 予算 ¥${currentPlan.budget.toLocaleString()}` : ""}
+                {overBudget && " ⚠ 予算超過"}
+              </p>
+            )}
           </div>
         </div>
 

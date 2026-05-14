@@ -10,6 +10,7 @@ class Ingredient(BaseModel):
 class Meal(BaseModel):
     name: str
     description: str
+    estimated_cost: Optional[int] = None
     ingredients: List[Ingredient]
 
 
@@ -63,6 +64,7 @@ class GenerateMealPlanRequest(BaseModel):
     meal_selection: MealSelection = MealSelection()
     forbidden_ingredients: List[str] = []
     preferences: str = ""
+    budget: Optional[int] = None
 
 
 class GenerateMealPlanResponse(BaseModel):
@@ -74,6 +76,7 @@ class RegenerateMealRequest(BaseModel):
     meal_type: str
     servings: int = 2
     current_plan: MealPlan
+    budget: Optional[int] = None
 
 
 class RegenerateMealResponse(BaseModel):
