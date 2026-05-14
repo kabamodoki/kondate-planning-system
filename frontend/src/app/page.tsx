@@ -60,6 +60,12 @@ export default function HomePage() {
           <p className="text-warm-500 text-sm">作りたい食事を選ぶだけ。AIが美味しい1週間を提案します。</p>
         </div>
 
+        {/* 利用上の注意 */}
+        <div className="bg-warm-100 border border-warm-200 rounded-xl px-4 py-3 mb-6 text-xs text-warm-600 space-y-1">
+          <p>⚠️ 無料枠のAIを利用しているため、混雑時に献立の生成ができない場合があります。</p>
+          <p>🕐 サーバーがスリープ中の場合、初回の生成に30秒〜1分ほどかかることがあります。</p>
+        </div>
+
         {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
         {/* 人数 */}
