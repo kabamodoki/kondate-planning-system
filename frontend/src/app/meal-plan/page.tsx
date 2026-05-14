@@ -7,6 +7,7 @@ import { useMealPlan } from "@/hooks/useMealPlan";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import MealPlanCalendar from "@/components/MealPlanCalendar";
 import ErrorBanner from "@/components/ErrorBanner";
+import AmazonCarousel, { KITCHEN_ITEMS } from "@/components/AmazonCarousel";
 
 export default function MealPlanPage() {
   const router = useRouter();
@@ -97,6 +98,8 @@ export default function MealPlanPage() {
         regeneratingKey={regeneratingKey}
         onRegenerate={handleRegenerate}
       />
+
+      <AmazonCarousel items={KITCHEN_ITEMS} label="調理器具をAmazonでチェック" />
     </div>
   );
 }

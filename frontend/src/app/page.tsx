@@ -7,6 +7,7 @@ import { useMealPlan } from "@/hooks/useMealPlan";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import ErrorBanner from "@/components/ErrorBanner";
 import UsageBanner from "@/components/UsageBanner";
+import AmazonCarousel, { FOOD_ITEMS } from "@/components/AmazonCarousel";
 
 const MEAL_COLOR: Record<MealType, { on: string; off: string; dot: string }> = {
   breakfast: { on: "bg-amber-100 border-amber-400 text-amber-800", off: "bg-white border-warm-200 text-warm-300", dot: "bg-amber-400" },
@@ -209,6 +210,8 @@ export default function HomePage() {
         >
           {selectedCount === 0 ? "食事を選んでください" : `${selectedCount}食分の献立を生成する ✨`}
         </button>
+
+        <AmazonCarousel items={FOOD_ITEMS} label="Amazonでチェック" />
 
         {/* 最近の履歴 */}
         {history.length > 0 && (
