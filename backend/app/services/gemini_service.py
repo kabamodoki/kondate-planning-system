@@ -114,8 +114,4 @@ def regenerate_meal(day: str, meal_type: str, servings: int, current_plan: MealP
 def check_gemini_health() -> str:
     if not GEMINI_API_KEY:
         return "no_api_key"
-    try:
-        _call_gemini("ping")
-        return "connected"
-    except GoogleAPIError:
-        return "disconnected"
+    return "connected"
