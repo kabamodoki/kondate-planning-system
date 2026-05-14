@@ -97,7 +97,8 @@ export default function HomePage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* PC: 横テーブル */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full" style={{ minWidth: "420px" }}>
               <thead>
                 <tr>
@@ -116,7 +117,7 @@ export default function HomePage() {
                 {MEAL_TYPES.map(mealType => (
                   <tr key={mealType}>
                     <td className="pr-2">
-                      <span className={`inline-flex items-center gap-1 text-xs font-medium`}>
+                      <span className="inline-flex items-center gap-1 text-xs font-medium">
                         <span className={`w-2 h-2 rounded-full ${MEAL_COLOR[mealType].dot}`} />
                         {MEAL_LABELS[mealType]}
                       </span>
@@ -140,6 +141,38 @@ export default function HomePage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* スマホ: 曜日別縦リスト */}
+          <div className="sm:hidden space-y-2">
+            {DAY_KEYS.map(day => (
+              <div key={day} className="border border-warm-200 rounded-xl overflow-hidden">
+                <div className={`px-3 py-2 text-xs font-bold ${
+                  day === "saturday" ? "bg-sky-50 text-sky-600" :
+                  day === "sunday"   ? "bg-rose-50 text-rose-500" :
+                  "bg-warm-100 text-warm-600"
+                }`}>
+                  {DAY_LABELS[day]}曜日
+                </div>
+                <div className="flex divide-x divide-warm-100">
+                  {MEAL_TYPES.map(mealType => {
+                    const selected = mealSelection[day][mealType];
+                    return (
+                      <button
+                        key={mealType}
+                        onClick={() => toggleMeal(day, mealType)}
+                        className={`flex-1 py-2.5 flex flex-col items-center gap-1 transition-colors ${
+                          selected ? MEAL_COLOR[mealType].on : "bg-white text-warm-300"
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${selected ? MEAL_COLOR[mealType].dot : "bg-warm-200"}`} />
+                        <span className="text-xs font-medium">{MEAL_LABELS[mealType]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
