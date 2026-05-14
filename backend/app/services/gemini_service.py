@@ -25,6 +25,7 @@ _model = genai.GenerativeModel(
     generation_config=genai.GenerationConfig(
         temperature=0.7,
         max_output_tokens=8192,
+        thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
     ),
 )
 
