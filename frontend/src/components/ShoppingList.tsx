@@ -3,7 +3,7 @@
 import { ShoppingCategory } from "@/types";
 
 const AMAZON_TAG = process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG;
-const AMAZON_EXCLUDED_CATEGORIES = ["調味料"];
+const AMAZON_EXCLUDED_CATEGORIES = ["肉・魚類", "野菜", "卵・乳製品"];
 
 const CATEGORY_EMOJI: Record<string, string> = {
   "肉・魚類": "🥩",
@@ -53,7 +53,7 @@ export default function ShoppingList({ categories }: ShoppingListProps) {
                 <li key={item.name} className="flex items-start gap-3">
                   <input type="checkbox" className="mt-0.5 accent-terra flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2 flex-wrap">
+                    <div className="flex items-baseline gap-2">
                       <span className="font-medium text-warm-900 text-sm">{item.name}</span>
                       <span className="text-warm-500 text-sm">{item.totalAmount}</span>
                       {AMAZON_TAG && !AMAZON_EXCLUDED_CATEGORIES.includes(cat.category) && (
@@ -61,7 +61,7 @@ export default function ShoppingList({ categories }: ShoppingListProps) {
                           href={`https://www.amazon.co.jp/s?k=${encodeURIComponent(item.name)}&tag=${AMAZON_TAG}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-terra hover:underline flex-shrink-0 no-underline"
+                          className="ml-auto text-xs text-terra hover:underline flex-shrink-0 no-underline"
                         >
                           Amazon PR
                         </a>
