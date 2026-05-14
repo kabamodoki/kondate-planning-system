@@ -75,11 +75,11 @@ export const DAY_KEYS: DayKey[] = ["monday", "tuesday", "wednesday", "thursday",
 export const MEAL_TYPES: MealType[] = ["breakfast", "lunch", "dinner"];
 
 export const DEFAULT_MEAL_SELECTION: MealSelection = {
-  monday:    { breakfast: true,  lunch: false, dinner: true },
-  tuesday:   { breakfast: true,  lunch: false, dinner: true },
-  wednesday: { breakfast: true,  lunch: false, dinner: true },
-  thursday:  { breakfast: true,  lunch: false, dinner: true },
-  friday:    { breakfast: true,  lunch: false, dinner: true },
-  saturday:  { breakfast: true,  lunch: true,  dinner: true },
-  sunday:    { breakfast: true,  lunch: true,  dinner: true },
+  monday:    { breakfast: true, lunch: true, dinner: true },
+  tuesday:   { breakfast: true, lunch: true, dinner: true },
+  wednesday: { breakfast: true, lunch: true, dinner: true },
+  thursday:  { breakfast: true, lunch: true, dinner: true },
+  friday:    { breakfast: true, lunch: true, dinner: true },
+  saturday:  { breakfast: true, lunch: true, dinner: true },
+  sunday:    { breakfast: true, lunch: true, dinner: true },
 };

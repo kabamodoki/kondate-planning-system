@@ -1,9 +1,11 @@
 # こんだて帖 🍱
 
-AIが1週間分の献立を自動で提案してくれるWebアプリです。  
+AIが1週間分の献立を自動で提案してくれるWebアプリです。
 作りたい食事を選ぶだけで、買い物リストまで自動生成します。
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
+**🌐 公開URL: https://kondate-planning-system.vercel.app/**
 
 ---
 
@@ -21,18 +23,43 @@ AIが1週間分の献立を自動で提案してくれるWebアプリです。
 
 ---
 
+## サーバー構成
+
+```
+ユーザー
+  ↓
+Vercel（フロントエンド）
+  https://kondate-planning-system.vercel.app/
+  ↓ API通信
+Render（バックエンド）
+  https://kondate-planning-system.onrender.com/
+  ↓ AI生成
+Google Gemini API（gemini-2.5-flash）
+```
+
+| レイヤー | サービス | 費用 |
+|--------|---------|------|
+| フロントエンド | [Vercel](https://vercel.com) Hobby プラン | 無料 |
+| バックエンド | [Render](https://render.com) Free プラン | 無料 |
+| AI | Google Gemini API 無料枠 | 無料 |
+
+> **注意**: Render の無料プランはアクセスがない状態が15分続くとスリープします。
+> 次のアクセス時に起動まで約30秒かかる場合があります。
+
+---
+
 ## 技術スタック
 
 | レイヤー | 技術 |
 |--------|------|
-| フロントエンド | Next.js 15 / TypeScript / Tailwind CSS |
+| フロントエンド | Next.js 16 / TypeScript / Tailwind CSS |
 | バックエンド | FastAPI / Python 3.12 |
 | AI | Google Gemini API（gemini-2.5-flash） |
-| インフラ | Docker Compose |
+| ローカル開発 | Docker Compose |
 
 ---
 
-## セットアップ
+## ローカルでのセットアップ
 
 ### 必要なもの
 
@@ -43,7 +70,7 @@ AIが1週間分の献立を自動で提案してくれるWebアプリです。
 
 ```bash
 # 1. リポジトリをクローン
-git clone https://github.com/YOUR_USERNAME/kondate-planning-system.git
+git clone https://github.com/kabamodoki/kondate-planning-system.git
 cd kondate-planning-system
 
 # 2. 環境変数を設定
@@ -74,12 +101,12 @@ docker compose up -d
 | 変数名 | 必須 | 説明 |
 |--------|------|------|
 | `GEMINI_API_KEY` | ✅ | Google Gemini API キー |
-| `NEXT_PUBLIC_API_URL` | ✅ | バックエンドURL（デフォルト: `http://localhost:8000`） |
+| `NEXT_PUBLIC_API_URL` | ✅ | バックエンドURL（ローカル: `http://localhost:8000`） |
 | `NEXT_PUBLIC_UNSPLASH_ACCESS_KEY` | ー | Unsplash API キー（画像表示用・任意） |
 
 ---
 
 ## ライセンス
 
-[MIT](./LICENSE) — 商用利用・改変・再配布すべて自由です。  
+[MIT](./LICENSE) — 商用利用・改変・再配布すべて自由です。
 ただし本ソフトウェアの使用によって生じたいかなる損害についても、作者は責任を負いません。
