@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from google.api_core.exceptions import GoogleAPIError
 
+from app.dependencies import verify_secret
 from app.models.schemas import (
     GenerateMealPlanRequest,
     GenerateMealPlanResponse,
@@ -9,7 +10,7 @@ from app.models.schemas import (
 )
 from app.services import gemini_service
 
-router = APIRouter(prefix="/api/meal-plan", tags=["meal-plan"])
+router = APIRouter(prefix="/api/meal-plan", tags=["meal-plan"], dependencies=[Depends(verify_secret)])
 
 
 @router.post("/generate", response_model=GenerateMealPlanResponse)
