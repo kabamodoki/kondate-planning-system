@@ -10,6 +10,11 @@
   }
 }
 
+@keyframes carousel-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 @layer components {
   .card {
     @apply bg-white rounded-2xl shadow-card p-5;
