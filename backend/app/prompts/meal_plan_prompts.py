@@ -1,7 +1,4 @@
-SYSTEM_PROMPT = """あなたは栄養バランスと彩りを考えた家庭料理の専門家です。
-日本の家庭で普通に作れる料理を提案します。
-必ず指定された JSON 形式のみで回答してください。
-前置きや説明文は不要です。JSON だけを出力してください。"""
+SYSTEM_PROMPT = "日本の家庭料理の専門家。指定の JSON 形式のみで回答。前置き・説明文不要。"
 
 DAY_JP = {
     "monday": "月曜",
@@ -39,7 +36,7 @@ def build_week_plan_prompt(
         if selected:
             selection_lines.append(f"- {DAY_JP[day]}: {' / '.join(MEAL_JP[m] for m in selected)}")
             format_parts[day] = {
-                m: {"name": "料理名", "description": "一文での説明", "ingredients": [{"name": "食材名", "amount": "分量"}]}
+                m: {"name": "料理名", "description": "短い説明", "ingredients": [{"name": "食材名", "amount": "分量"}]}
                 for m in selected
             }
 
@@ -65,18 +62,14 @@ def build_week_plan_prompt(
     if preferences.strip():
         preferences_section = f"\n【好み・スタイル】\n{preferences.strip()}\n"
 
-    return f"""以下の条件で指定された食事のみ生成してください。
+    return f"""条件に従い指定の食事のみ生成。
 
-【生成対象】
-{selection_text}
+【生成対象】{selection_text}
 
 【条件】
-- {servings}人分の食材量で生成する（食材の量はすべて{servings}人分で記載）
-- 同じ料理名は直近3日以内に繰り返さない
-- 日本の家庭料理を中心に（和食・洋食・中華をバランスよく）
-- 材料は日本のスーパーで購入できるものに限定する
-- 朝食はシンプルなもの（5〜10分で作れる程度）
-- 昼食・夕食はやや充実したもの
+- {servings}人分・直近3日以内に同じ料理名不可・和洋中バランス
+- 日本のスーパーで買える食材・朝食は5〜10分で作れるシンプルな料理
+- description は15文字以内の短い説明
 {forbidden_section}{preferences_section}
 【タグ生成ルール（出力JSONの "tags" フィールド）】
 - "tags.forbidden": 禁止食材の入力から食材名のみを抽出して配列にする
@@ -86,25 +79,15 @@ def build_week_plan_prompt(
   例: 「和食中心でお願いします」→「和食中心」、「なるべくヘルシーに」→「ヘルシー」、「魚料理を週3回以上」→「魚多め」
   食材・調理スタイルと無関係な語（「お願いします」「なるべく」等）は除外する。好みの入力がない場合は空配列 []。
 
-【出力形式（JSON のみ・説明文不要・生成対象の食事のみ含める）】
+【出力（JSON のみ・生成対象の食事のみ含める）】
 {format_example}"""
 
 
-REGENERATE_MEAL_TEMPLATE = """以下の条件で{day}の{meal_type}の料理を1つ生成してください。
+REGENERATE_MEAL_TEMPLATE = """{day}の{meal_type}を1つ生成。
 
-【除外する料理（直近3日以内に出た料理）】
-{already_used_dishes}
+【除外（直近3日以内）】{already_used_dishes}
 
-【条件】
-- 上記リストにない料理を必ず選ぶ
-- 日本の家庭料理（和食・洋食・中華）
-- {meal_type}に適した料理
+【条件】除外リスト以外・日本の家庭料理・{meal_type}に適したもの・description は15文字以内
 
-【出力形式（JSON のみ）】
-{{
-  "name": "料理名",
-  "description": "一文での説明",
-  "ingredients": [
-    {{ "name": "食材名", "amount": "分量" }}
-  ]
-}}"""
+【出力（JSON のみ）】
+{{"name":"料理名","description":"短い説明","ingredients":[{{"name":"食材名","amount":"分量"}}]}}"""

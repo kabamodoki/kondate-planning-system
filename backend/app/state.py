@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from collections import deque
 
 JST = ZoneInfo("Asia/Tokyo")
-DAILY_API_LIMIT = int(os.getenv("DAILY_API_LIMIT", "100"))
+DAILY_API_LIMIT = int(os.getenv("DAILY_API_LIMIT", "30"))
 COMMUNITY_MAX = 300
 COMMUNITY_TTL_DAYS = 10
 

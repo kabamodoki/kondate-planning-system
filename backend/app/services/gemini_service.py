@@ -1,8 +1,8 @@
 import json
 import os
 import time
-import google.generativeai as genai
-from google.api_core.exceptions import GoogleAPIError, ResourceExhausted
+from google import genai
+from google.genai import types
 
 from app.models.schemas import MealPlan, MealSelection, DayMeals, Meal
 from app.prompts.meal_plan_prompts import (
@@ -17,28 +17,37 @@ from app.prompts.meal_plan_prompts import (
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
-genai.configure(api_key=GEMINI_API_KEY)
+_client = genai.Client(api_key=GEMINI_API_KEY)
 
-_model = genai.GenerativeModel(
-    model_name=GEMINI_MODEL,
+# thinking_budget=0 で推論モード（Thinking）を無効化しコストを抑える
+_config = types.GenerateContentConfig(
     system_instruction=SYSTEM_PROMPT,
-    generation_config=genai.GenerationConfig(
-        temperature=0.7,
-        max_output_tokens=8192,
-    ),
+    temperature=0.7,
+    max_output_tokens=8192,
+    thinking_config=types.ThinkingConfig(thinking_budget=0),
 )
+
+
+class GeminiAPIError(Exception):
+    pass
 
 
 def _call_gemini(prompt: str) -> str:
     for attempt in range(3):
         try:
-            response = _model.generate_content(prompt)
+            response = _client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt,
+                config=_config,
+            )
             return response.text
-        except ResourceExhausted as e:
-            if attempt < 2:
+        except Exception as e:
+            msg = str(e)
+            is_quota = "429" in msg or "RESOURCE_EXHAUSTED" in msg.upper()
+            if is_quota and attempt < 2:
                 time.sleep(15 * (attempt + 1))
             else:
-                raise GoogleAPIError(str(e)) from e
+                raise GeminiAPIError(msg) from e
 
 
 def _parse_json_with_retry(prompt: str) -> dict:
@@ -75,7 +84,6 @@ def generate_week_plan(
     prompt = build_week_plan_prompt(servings, sel_dict, forbidden_ingredients, preferences)
     data = _parse_json_with_retry(prompt)
 
-    # AIが生成したタグを取得（失敗時は空配列でフォールバック）
     raw_tags = data.get("tags", {})
     tags = {
         "forbidden": [str(t) for t in raw_tags.get("forbidden", []) if t],

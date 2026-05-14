@@ -1,7 +1,5 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request
-from google.api_core.exceptions import GoogleAPIError
-
 from app.dependencies import verify_secret
 from app.models.schemas import (
     GenerateMealPlanRequest,
@@ -10,6 +8,7 @@ from app.models.schemas import (
     RegenerateMealResponse,
 )
 from app.services import gemini_service
+from app.services.gemini_service import GeminiAPIError
 from app import state
 
 router = APIRouter(prefix="/api/meal-plan", tags=["meal-plan"], dependencies=[Depends(verify_secret)])
@@ -67,7 +66,7 @@ async def generate_meal_plan(req: GenerateMealPlanRequest, request: Request):
         })
 
         return response
-    except GoogleAPIError as e:
+    except GeminiAPIError as e:
         raise HTTPException(
             status_code=503,
             detail={"error": "gemini_unavailable", "message": f"Gemini API エラー: {str(e)}"},
@@ -105,7 +104,7 @@ async def regenerate_meal(req: RegenerateMealRequest, request: Request):
             current_plan=req.current_plan,
         )
         return RegenerateMealResponse(meal=meal)
-    except GoogleAPIError as e:
+    except GeminiAPIError as e:
         raise HTTPException(
             status_code=503,
             detail={"error": "gemini_unavailable", "message": f"Gemini API エラー: {str(e)}"},
