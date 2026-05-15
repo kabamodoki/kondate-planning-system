@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <footer className="mt-16 border-t border-warm-100 bg-white/60 py-6 text-center">
           <AffiliateBanner />
-          <div className="flex items-center justify-center gap-4 mb-1">
+          <div className="flex items-center justify-center gap-4 mb-2">
             <Link href="/terms" className="text-xs text-warm-300 hover:text-terra transition-colors no-underline">
               利用規約
             </Link>
@@ -54,6 +54,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               GitHub
             </a>
           </div>
+          <p className="text-xs text-warm-300 mb-1">
+            本サービスはAmazonアソシエイト・プログラムの参加者です。
+          </p>
           <p className="text-xs text-warm-300">© 2026 こんだて帖</p>
         </footer>
       </body>

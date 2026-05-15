@@ -24,6 +24,7 @@ export default function UsageBanner() {
     return (
       <div className="bg-warm-100 border border-warm-200 rounded-xl px-4 py-3 mb-6 text-sm text-warm-700 space-y-1">
         <p className="font-medium">本日の生成枠が終了しました。</p>
+        <p className="text-xs text-warm-400">AI の無料 API を全ユーザーで共有しているため、上限に達することがあります。</p>
         <Link href="/community" className="text-terra font-medium hover:underline">
           みんなの献立をご覧ください →
         </Link>
@@ -49,6 +50,7 @@ export default function UsageBanner() {
           style={{ width: `${pct}%` }}
         />
       </div>
+      <p className="text-xs text-warm-300 mt-1.5">AI の無料 API を全ユーザーで共有しています</p>
     </div>
   );
 }

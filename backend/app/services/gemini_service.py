@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import time
@@ -8,10 +9,12 @@ from app.models.schemas import MealPlan, MealSelection, DayMeals, Meal
 from app.prompts.meal_plan_prompts import (
     SYSTEM_PROMPT,
     build_week_plan_prompt,
+    build_meal_type_plan_prompt,
     REGENERATE_MEAL_TEMPLATE,
     DAY_JP,
     MEAL_JP,
     DAY_KEYS,
+    MEAL_KEYS,
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
@@ -66,12 +69,15 @@ def _parse_json_with_retry(prompt: str) -> dict:
                 raise ValueError(f"JSON パース失敗（3回試行）: {last_error}") from last_error
 
 
-def generate_week_plan(
+async def generate_week_plan(
     servings: int,
     meal_selection: MealSelection,
     forbidden_ingredients: list[str] | None = None,
     preferences: str = "",
     budget: int | None = None,
+    breakfast_cooking_limit: int | None = None,
+    lunch_cooking_limit: int | None = None,
+    dinner_cooking_limit: int | None = None,
 ) -> tuple[MealPlan, dict]:
     sel_dict = {
         day: {
@@ -82,25 +88,67 @@ def generate_week_plan(
         for day in DAY_KEYS
     }
 
-    prompt = build_week_plan_prompt(servings, sel_dict, forbidden_ingredients, preferences, budget)
-    data = _parse_json_with_retry(prompt)
+    cooking_limits = {
+        "breakfast": breakfast_cooking_limit,
+        "lunch": lunch_cooking_limit,
+        "dinner": dinner_cooking_limit,
+    }
 
-    raw_tags = data.get("tags", {})
+    # 食事タイプごとに選択されている曜日リストを作成
+    meal_type_days: dict[str, list[str]] = {
+        mt: [day for day in DAY_KEYS if sel_dict[day][mt]]
+        for mt in MEAL_KEYS
+    }
+    active_meal_types = [mt for mt in MEAL_KEYS if meal_type_days[mt]]
+
+    # 各食事タイプを並列実行（最初のタイプのみ tags を生成）
+    async def _call(meal_type: str, include_tags: bool) -> dict:
+        prompt = build_meal_type_plan_prompt(
+            meal_type=meal_type,
+            servings=servings,
+            selected_days=meal_type_days[meal_type],
+            forbidden_ingredients=forbidden_ingredients,
+            preferences=preferences,
+            budget=budget,
+            cooking_limit=cooking_limits[meal_type],
+            include_tags=include_tags,
+        )
+        return await asyncio.to_thread(_parse_json_with_retry, prompt)
+
+    results = await asyncio.gather(*[
+        _call(mt, include_tags=(i == 0))
+        for i, mt in enumerate(active_meal_types)
+    ])
+
+    # tags は最初の結果から取得
+    raw_tags = results[0].get("tags", {}) if results else {}
     tags = {
         "forbidden": [str(t) for t in raw_tags.get("forbidden", []) if t],
         "preferences": [str(t) for t in raw_tags.get("preferences", []) if t],
     }
 
-    day_meals = {}
-    for day in DAY_KEYS:
-        day_data = data.get(day, {})
-        day_sel = sel_dict[day]
-        day_meals[day] = DayMeals(
-            breakfast=Meal(**day_data["breakfast"]) if day_sel["breakfast"] and "breakfast" in day_data else None,
-            lunch=Meal(**day_data["lunch"]) if day_sel["lunch"] and "lunch" in day_data else None,
-            dinner=Meal(**day_data["dinner"]) if day_sel["dinner"] and "dinner" in day_data else None,
-        )
+    # 結果をマージして MealPlan を構築
+    merged: dict[str, dict[str, Meal | None]] = {
+        day: {"breakfast": None, "lunch": None, "dinner": None}
+        for day in DAY_KEYS
+    }
+    for mt, data in zip(active_meal_types, results):
+        for day in meal_type_days[mt]:
+            day_data = data.get(day, {})
+            if mt in day_data:
+                try:
+                    merged[day][mt] = Meal(**day_data[mt])
+                except Exception:
+                    pass
 
+    day_meals = {
+        day: DayMeals(
+            breakfast=merged[day]["breakfast"],
+            lunch=merged[day]["lunch"],
+            dinner=merged[day]["dinner"],
+        )
+        for day in DAY_KEYS
+    }
     return MealPlan(**day_meals), tags
 
 

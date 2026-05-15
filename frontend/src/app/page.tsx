@@ -7,6 +7,7 @@ import { useMealPlan } from "@/hooks/useMealPlan";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import ErrorBanner from "@/components/ErrorBanner";
 import UsageBanner from "@/components/UsageBanner";
+import VersionHistory from "@/components/VersionHistory";
 
 const MEAL_COLOR: Record<MealType, { on: string; off: string; dot: string }> = {
   breakfast: { on: "bg-amber-100 border-amber-400 text-amber-800", off: "bg-white border-warm-200 text-warm-300", dot: "bg-amber-400" },
@@ -21,6 +22,9 @@ export default function HomePage() {
   const [forbiddenIngredients, setForbiddenIngredients] = useLocalStorage<string>("kondate_forbidden", "");
   const [preferences, setPreferences] = useLocalStorage<string>("kondate_preferences", "");
   const [budget, setBudget] = useLocalStorage<number>("kondate_budget", 0);
+  const [breakfastCookingLimit, setBreakfastCookingLimit] = useLocalStorage<number>("kondate_cooking_breakfast", 0);
+  const [lunchCookingLimit, setLunchCookingLimit] = useLocalStorage<number>("kondate_cooking_lunch", 0);
+  const [dinnerCookingLimit, setDinnerCookingLimit] = useLocalStorage<number>("kondate_cooking_dinner", 0);
   const [history] = useLocalStorage<MealPlan[]>("kondate_history", []);
   const { loading, error, setError, generate } = useMealPlan();
 
@@ -29,6 +33,18 @@ export default function HomePage() {
       ...mealSelection,
       [day]: { ...mealSelection[day], [mealType]: !mealSelection[day][mealType] },
     });
+  };
+
+  const selectAll = () => {
+    const all: MealSelection = {} as MealSelection;
+    DAY_KEYS.forEach(day => { all[day] = { breakfast: true, lunch: true, dinner: true }; });
+    setMealSelection(all);
+  };
+
+  const deselectAll = () => {
+    const none: MealSelection = {} as MealSelection;
+    DAY_KEYS.forEach(day => { none[day] = { breakfast: false, lunch: false, dinner: false }; });
+    setMealSelection(none);
   };
 
   const selectedCount = DAY_KEYS.reduce((acc, day) =>
@@ -40,7 +56,7 @@ export default function HomePage() {
       .split(/[、,，\n]/)
       .map((s) => s.trim())
       .filter(Boolean);
-    const plan = await generate(servings, mealSelection, forbidden, preferences, budget || undefined);
+    const plan = await generate(servings, mealSelection, forbidden, preferences, budget || undefined, breakfastCookingLimit || undefined, lunchCookingLimit || undefined, dinnerCookingLimit || undefined);
     if (plan) {
       try { localStorage.setItem("kondate_current", JSON.stringify(plan)); } catch {/* ignore */}
       router.push("/meal-plan");
@@ -90,9 +106,14 @@ export default function HomePage() {
         <div className="card mb-4">
           <div className="flex items-center justify-between mb-4">
             <p className="font-bold text-warm-900">作る食事を選ぶ</p>
-            <span className="text-xs text-warm-400 bg-warm-100 px-3 py-1 rounded-full">
-              {selectedCount} / 21 食
-            </span>
+            <div className="flex items-center gap-2">
+              <button onClick={selectAll} className="text-xs text-terra hover:underline">全選択</button>
+              <span className="text-warm-200">|</span>
+              <button onClick={deselectAll} className="text-xs text-warm-400 hover:underline">全解除</button>
+              <span className="text-xs text-warm-400 bg-warm-100 px-3 py-1 rounded-full ml-1">
+                {selectedCount} / 21 食
+              </span>
+            </div>
           </div>
 
           {/* PC: 横テーブル */}
@@ -202,6 +223,35 @@ export default function HomePage() {
           </div>
           <div>
             <label className="block font-bold text-warm-900 mb-2 text-sm">
+              ⏱ 調理時間の上限（任意）
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: "朝食", value: breakfastCookingLimit, set: setBreakfastCookingLimit },
+                { label: "昼食", value: lunchCookingLimit, set: setLunchCookingLimit },
+                { label: "夕食", value: dinnerCookingLimit, set: setDinnerCookingLimit },
+              ].map(({ label, value, set }) => (
+                <div key={label}>
+                  <p className="text-xs text-warm-500 mb-1">{label}</p>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      value={value || ""}
+                      onChange={(e) => set(e.target.value ? Number(e.target.value) : 0)}
+                      placeholder="–"
+                      min={5}
+                      max={120}
+                      step={5}
+                      className="input-base w-full text-sm"
+                    />
+                    <span className="text-xs text-warm-400 whitespace-nowrap">分</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block font-bold text-warm-900 mb-2 text-sm">
               💰 週の食費予算（任意）
             </label>
             <div className="flex items-center gap-2">
@@ -226,6 +276,8 @@ export default function HomePage() {
         >
           {selectedCount === 0 ? "食事を選んでください" : `${selectedCount}食分の献立を生成する ✨`}
         </button>
+
+        <VersionHistory />
 
         {/* 最近の履歴 */}
         {history.length > 0 && (
