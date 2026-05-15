@@ -97,7 +97,12 @@ def build_week_plan_prompt(
 
     cooking_limit_section = ""
     if weekday_cooking_limit:
-        cooking_limit_section = f"\n【調理時間制約】平日（月〜金）は{weekday_cooking_limit}分以内で作れる料理を優先する。週末（土・日）は制限なし。\n"
+        cooking_limit_section = (
+            f"\n【調理時間制約（厳守）】"
+            f"平日（月〜金）の朝食・昼食は必ず{weekday_cooking_limit}分以内で作れるものを選ぶこと。"
+            f"朝食・昼食の cooking_time が{weekday_cooking_limit}を超える料理は絶対に生成しない。"
+            f"平日の夕食・週末（土・日）は制限なし。\n"
+        )
 
     return f"""条件に従い指定の食事のみ生成。
 
@@ -122,6 +127,94 @@ def build_week_plan_prompt(
   食材・調理スタイルと無関係な語（「お願いします」「なるべく」等）は除外する。好みの入力がない場合は空配列 []。
 
 【出力（JSON のみ・生成対象の食事のみ含める）】
+{format_example}"""
+
+
+_MEAL_TYPE_NOTE = {
+    "breakfast": "- 朝食は5〜10分で作れるシンプルな料理（和食なら ご飯＋味噌汁＋一品 程度）",
+    "lunch": "- 昼食として適切なボリューム・食べ応えの料理",
+    "dinner": "- 夕食はしっかりした主菜の料理。時間がかかっても構わない",
+}
+
+
+def build_meal_type_plan_prompt(
+    meal_type: str,
+    servings: int,
+    selected_days: list[str],
+    forbidden_ingredients: list[str] | None = None,
+    preferences: str = "",
+    budget: int | None = None,
+    cooking_limit: int | None = None,
+    include_tags: bool = False,
+) -> str:
+    """朝食/昼食/夕食のいずれか1タイプに特化したプロンプトを構築する。"""
+    import json
+
+    meal_jp = MEAL_JP[meal_type]
+    meal_note = _MEAL_TYPE_NOTE[meal_type]
+
+    selection_lines = [f"- {DAY_JP[day]}: {meal_jp}" for day in selected_days]
+    selection_text = "\n".join(selection_lines)
+
+    meal_tmpl = {"name": "料理名", "description": "短い説明", "estimated_cost": 300, "cooking_time": 20, "ingredients": [{"name": "食材名", "amount": "分量"}]}
+    format_parts = {day: {meal_type: meal_tmpl} for day in selected_days}
+    if include_tags:
+        format_example = json.dumps({"tags": {"forbidden": ["食材名"], "preferences": ["タグ"]}, **format_parts}, ensure_ascii=False, indent=2)
+    else:
+        format_example = json.dumps(format_parts, ensure_ascii=False, indent=2)
+
+    forbidden_section = ""
+    if forbidden_ingredients:
+        items = "\n".join(f"- {ing}" for ing in forbidden_ingredients)
+        forbidden_section = f"\n【使用禁止食材】\n{items}\n- 上記食材を含む料理は絶対に生成しないこと\n"
+
+    preferences_section = ""
+    if preferences.strip():
+        preferences_section = f"\n【好み・スタイル】\n{preferences.strip()}\n"
+
+    budget_section = ""
+    if budget:
+        budget_section = f"\n【予算】1週間の食費目安は{budget}円以内（{servings}人分）。食材費を意識した料理を選ぶこと。\n"
+
+    weekday_hint, weekend_hint = _detect_weekday_style(preferences)
+    weekday_style_section = ""
+    if weekday_hint or weekend_hint:
+        lines = [h for h in [weekday_hint, weekend_hint] if h]
+        weekday_style_section = "\n【曜日別スタイル】\n" + "\n".join(f"- {l}" for l in lines) + "\n"
+
+    cooking_limit_section = ""
+    if cooking_limit:
+        cooking_limit_section = (
+            f"\n【調理時間制約（厳守）】"
+            f"{meal_jp}は必ず{cooking_limit}分以内で作れる料理のみ生成すること。"
+            f"cooking_time が{cooking_limit}を超える料理は絶対に生成しない。\n"
+        )
+
+    tags_section = ""
+    if include_tags:
+        tags_section = """
+【タグ生成ルール（"tags" フィールド）】
+- "tags.forbidden": 禁止食材から食材名のみを抽出して配列にする。入力がない場合は []。
+- "tags.preferences": 好みから食に関連する短いキーワードのみ抽出して配列にする。入力がない場合は []。
+"""
+
+    return f"""{meal_jp}のみ生成。
+
+【生成対象】
+{selection_text}
+
+【条件】
+- {servings}人分・直近3日以内に同じ料理名不可
+- 和食/洋食/中華を週内で均等に分散させる（同一ジャンルが3日以上連続しない）
+- 調理法（焼く/煮る/炒める/揚げる）を週内でバランスよく使う
+- 主食材（鶏肉/豚肉/牛肉/魚/卵/大豆）を週内で偏りなく使う
+- 日本のスーパーで買える食材
+{meal_note}
+- description は15文字以内の短い説明
+- estimated_costには{servings}人分の食材費目安を円の整数で入力
+- cooking_timeには準備〜盛り付けまでの調理時間目安を分の整数で入力
+{forbidden_section}{preferences_section}{budget_section}{weekday_style_section}{cooking_limit_section}{tags_section}
+【出力（JSON のみ・生成対象の日のみ含める）】
 {format_example}"""
 
 

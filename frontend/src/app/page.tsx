@@ -22,7 +22,9 @@ export default function HomePage() {
   const [forbiddenIngredients, setForbiddenIngredients] = useLocalStorage<string>("kondate_forbidden", "");
   const [preferences, setPreferences] = useLocalStorage<string>("kondate_preferences", "");
   const [budget, setBudget] = useLocalStorage<number>("kondate_budget", 0);
-  const [weekdayCookingLimit, setWeekdayCookingLimit] = useLocalStorage<number>("kondate_cooking_limit", 0);
+  const [breakfastCookingLimit, setBreakfastCookingLimit] = useLocalStorage<number>("kondate_cooking_breakfast", 0);
+  const [lunchCookingLimit, setLunchCookingLimit] = useLocalStorage<number>("kondate_cooking_lunch", 0);
+  const [dinnerCookingLimit, setDinnerCookingLimit] = useLocalStorage<number>("kondate_cooking_dinner", 0);
   const [history] = useLocalStorage<MealPlan[]>("kondate_history", []);
   const { loading, error, setError, generate } = useMealPlan();
 
@@ -54,7 +56,7 @@ export default function HomePage() {
       .split(/[、,，\n]/)
       .map((s) => s.trim())
       .filter(Boolean);
-    const plan = await generate(servings, mealSelection, forbidden, preferences, budget || undefined, weekdayCookingLimit || undefined);
+    const plan = await generate(servings, mealSelection, forbidden, preferences, budget || undefined, breakfastCookingLimit || undefined, lunchCookingLimit || undefined, dinnerCookingLimit || undefined);
     if (plan) {
       try { localStorage.setItem("kondate_current", JSON.stringify(plan)); } catch {/* ignore */}
       router.push("/meal-plan");
@@ -221,20 +223,31 @@ export default function HomePage() {
           </div>
           <div>
             <label className="block font-bold text-warm-900 mb-2 text-sm">
-              ⏱ 平日の調理時間（任意）
+              ⏱ 調理時間の上限（任意）
             </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={weekdayCookingLimit || ""}
-                onChange={(e) => setWeekdayCookingLimit(e.target.value ? Number(e.target.value) : 0)}
-                placeholder="例: 20"
-                min={5}
-                max={120}
-                step={5}
-                className="input-base w-28"
-              />
-              <span className="text-sm text-warm-500">分以内（月〜金）</span>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { label: "朝食", value: breakfastCookingLimit, set: setBreakfastCookingLimit },
+                { label: "昼食", value: lunchCookingLimit, set: setLunchCookingLimit },
+                { label: "夕食", value: dinnerCookingLimit, set: setDinnerCookingLimit },
+              ] as const).map(({ label, value, set }) => (
+                <div key={label}>
+                  <p className="text-xs text-warm-500 mb-1">{label}</p>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      value={value || ""}
+                      onChange={(e) => set(e.target.value ? Number(e.target.value) : 0)}
+                      placeholder="–"
+                      min={5}
+                      max={120}
+                      step={5}
+                      className="input-base w-full text-sm"
+                    />
+                    <span className="text-xs text-warm-400 whitespace-nowrap">分</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
           <div>

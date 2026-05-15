@@ -26,7 +26,7 @@ async def generate_meal_plan(req: GenerateMealPlanRequest, request: Request):
     sel_dict = req.meal_selection.model_dump()
 
     # Cache check first — no IP/budget consumed on hit
-    cache_key = state.build_cache_key(req.servings, sel_dict, req.forbidden_ingredients, req.preferences, req.budget, req.weekday_cooking_limit)
+    cache_key = state.build_cache_key(req.servings, sel_dict, req.forbidden_ingredients, req.preferences, req.budget, req.breakfast_cooking_limit, req.lunch_cooking_limit, req.dinner_cooking_limit)
     cached = state.get_cache(cache_key)
     if cached:
         return GenerateMealPlanResponse(**cached)
@@ -46,13 +46,15 @@ async def generate_meal_plan(req: GenerateMealPlanRequest, request: Request):
         )
 
     try:
-        meal_plan, ai_tags = gemini_service.generate_week_plan(
+        meal_plan, ai_tags = await gemini_service.generate_week_plan(
             servings=req.servings,
             meal_selection=req.meal_selection,
             forbidden_ingredients=req.forbidden_ingredients,
             preferences=req.preferences,
             budget=req.budget,
-            weekday_cooking_limit=req.weekday_cooking_limit,
+            breakfast_cooking_limit=req.breakfast_cooking_limit,
+            lunch_cooking_limit=req.lunch_cooking_limit,
+            dinner_cooking_limit=req.dinner_cooking_limit,
         )
         response = GenerateMealPlanResponse(meal_plan=meal_plan)
 

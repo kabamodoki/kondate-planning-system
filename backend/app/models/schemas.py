@@ -66,7 +66,9 @@ class GenerateMealPlanRequest(BaseModel):
     forbidden_ingredients: List[str] = Field(default=[])
     preferences: str = Field(default="", max_length=300)
     budget: Optional[int] = Field(default=None, ge=0, le=100000)
-    weekday_cooking_limit: Optional[int] = Field(default=None, ge=5, le=120)
+    breakfast_cooking_limit: Optional[int] = Field(default=None, ge=5, le=120)
+    lunch_cooking_limit: Optional[int] = Field(default=None, ge=5, le=120)
+    dinner_cooking_limit: Optional[int] = Field(default=None, ge=5, le=120)
 
     @field_validator("forbidden_ingredients")
     @classmethod

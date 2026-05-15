@@ -67,10 +67,10 @@ def check_and_consume_regenerate_ip(ip: str) -> bool:
 # ── 結果キャッシュ ────────────────────────────────────
 _cache: dict[str, dict] = {}
 
-def build_cache_key(servings: int, meal_selection: dict, forbidden: list[str], preferences: str, budget: int | None = None, weekday_cooking_limit: int | None = None) -> str:
-    has_restrictions = bool(forbidden) or bool(preferences.strip()) or budget is not None or weekday_cooking_limit is not None
+def build_cache_key(servings: int, meal_selection: dict, forbidden: list[str], preferences: str, budget: int | None = None, breakfast_limit: int | None = None, lunch_limit: int | None = None, dinner_limit: int | None = None) -> str:
+    has_restrictions = bool(forbidden) or bool(preferences.strip()) or budget is not None or any(x is not None for x in [breakfast_limit, lunch_limit, dinner_limit])
     if has_restrictions:
-        key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}:{sorted(forbidden)}:{preferences.strip()}:{budget}:{weekday_cooking_limit}"
+        key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}:{sorted(forbidden)}:{preferences.strip()}:{budget}:{breakfast_limit}:{lunch_limit}:{dinner_limit}"
     else:
         key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}"
     return hashlib.sha256(key_data.encode()).hexdigest()
