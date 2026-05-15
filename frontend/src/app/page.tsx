@@ -226,11 +226,11 @@ export default function HomePage() {
               ⏱ 調理時間の上限（任意）
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {([
+              {[
                 { label: "朝食", value: breakfastCookingLimit, set: setBreakfastCookingLimit },
                 { label: "昼食", value: lunchCookingLimit, set: setLunchCookingLimit },
                 { label: "夕食", value: dinnerCookingLimit, set: setDinnerCookingLimit },
-              ] as const).map(({ label, value, set }) => (
+              ].map(({ label, value, set }) => (
                 <div key={label}>
                   <p className="text-xs text-warm-500 mb-1">{label}</p>
                   <div className="flex items-center gap-1">
