@@ -72,6 +72,7 @@ def generate_week_plan(
     forbidden_ingredients: list[str] | None = None,
     preferences: str = "",
     budget: int | None = None,
+    weekday_cooking_limit: int | None = None,
 ) -> tuple[MealPlan, dict]:
     sel_dict = {
         day: {
@@ -82,7 +83,7 @@ def generate_week_plan(
         for day in DAY_KEYS
     }
 
-    prompt = build_week_plan_prompt(servings, sel_dict, forbidden_ingredients, preferences, budget)
+    prompt = build_week_plan_prompt(servings, sel_dict, forbidden_ingredients, preferences, budget, weekday_cooking_limit)
     data = _parse_json_with_retry(prompt)
 
     raw_tags = data.get("tags", {})

@@ -46,6 +46,7 @@ def build_week_plan_prompt(
     forbidden_ingredients: list[str] | None = None,
     preferences: str = "",
     budget: int | None = None,
+    weekday_cooking_limit: int | None = None,
 ) -> str:
     """選択された食事のみ生成するプロンプトを構築する。"""
     selection_lines = []
@@ -94,6 +95,10 @@ def build_week_plan_prompt(
         lines = [h for h in [weekday_hint, weekend_hint] if h]
         weekday_style_section = "\n【曜日別スタイル】\n" + "\n".join(f"- {l}" for l in lines) + "\n"
 
+    cooking_limit_section = ""
+    if weekday_cooking_limit:
+        cooking_limit_section = f"\n【調理時間制約】平日（月〜金）は{weekday_cooking_limit}分以内で作れる料理を優先する。週末（土・日）は制限なし。\n"
+
     return f"""条件に従い指定の食事のみ生成。
 
 【生成対象】{selection_text}
@@ -107,7 +112,7 @@ def build_week_plan_prompt(
 - description は15文字以内の短い説明
 - estimated_costには{servings}人分の1食あたりの食材費目安を円の整数で入力（一般的なスーパーの価格帯）
 - cooking_timeには準備〜盛り付けまでの調理時間目安を分の整数で入力
-{forbidden_section}{preferences_section}{budget_section}{weekday_style_section}
+{forbidden_section}{preferences_section}{budget_section}{weekday_style_section}{cooking_limit_section}
 【タグ生成ルール（出力JSONの "tags" フィールド）】
 - "tags.forbidden": 禁止食材の入力から食材名のみを抽出して配列にする
   例: 「卵アレルギー」→「卵」、「乳製品は使わないで」→「乳製品」、「ナッツ類NG」→「ナッツ」

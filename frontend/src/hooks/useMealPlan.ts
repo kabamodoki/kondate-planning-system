@@ -17,11 +17,12 @@ export function useMealPlan() {
     forbiddenIngredients: string[],
     preferences: string,
     budget?: number,
+    weekdayCookingLimit?: number,
   ) => {
     setLoading(true);
     setError(null);
     try {
-      const { meal_plan } = await api.generateMealPlan(servings, mealSelection, forbiddenIngredients, preferences, budget);
+      const { meal_plan } = await api.generateMealPlan(servings, mealSelection, forbiddenIngredients, preferences, budget, weekdayCookingLimit);
       const plan: MealPlan = {
         id: uuidv4(),
         createdAt: new Date().toISOString(),

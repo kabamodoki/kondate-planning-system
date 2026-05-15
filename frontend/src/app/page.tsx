@@ -22,6 +22,7 @@ export default function HomePage() {
   const [forbiddenIngredients, setForbiddenIngredients] = useLocalStorage<string>("kondate_forbidden", "");
   const [preferences, setPreferences] = useLocalStorage<string>("kondate_preferences", "");
   const [budget, setBudget] = useLocalStorage<number>("kondate_budget", 0);
+  const [weekdayCookingLimit, setWeekdayCookingLimit] = useLocalStorage<number>("kondate_cooking_limit", 0);
   const [history] = useLocalStorage<MealPlan[]>("kondate_history", []);
   const { loading, error, setError, generate } = useMealPlan();
 
@@ -53,7 +54,7 @@ export default function HomePage() {
       .split(/[、,，\n]/)
       .map((s) => s.trim())
       .filter(Boolean);
-    const plan = await generate(servings, mealSelection, forbidden, preferences, budget || undefined);
+    const plan = await generate(servings, mealSelection, forbidden, preferences, budget || undefined, weekdayCookingLimit || undefined);
     if (plan) {
       try { localStorage.setItem("kondate_current", JSON.stringify(plan)); } catch {/* ignore */}
       router.push("/meal-plan");
@@ -217,6 +218,24 @@ export default function HomePage() {
               rows={3}
               className="input-base resize-none"
             />
+          </div>
+          <div>
+            <label className="block font-bold text-warm-900 mb-2 text-sm">
+              ⏱ 平日の調理時間（任意）
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={weekdayCookingLimit || ""}
+                onChange={(e) => setWeekdayCookingLimit(e.target.value ? Number(e.target.value) : 0)}
+                placeholder="例: 20"
+                min={5}
+                max={120}
+                step={5}
+                className="input-base w-28"
+              />
+              <span className="text-sm text-warm-500">分以内（月〜金）</span>
+            </div>
           </div>
           <div>
             <label className="block font-bold text-warm-900 mb-2 text-sm">

@@ -67,10 +67,10 @@ def check_and_consume_regenerate_ip(ip: str) -> bool:
 # ── 結果キャッシュ ────────────────────────────────────
 _cache: dict[str, dict] = {}
 
-def build_cache_key(servings: int, meal_selection: dict, forbidden: list[str], preferences: str, budget: int | None = None) -> str:
-    has_restrictions = bool(forbidden) or bool(preferences.strip()) or budget is not None
+def build_cache_key(servings: int, meal_selection: dict, forbidden: list[str], preferences: str, budget: int | None = None, weekday_cooking_limit: int | None = None) -> str:
+    has_restrictions = bool(forbidden) or bool(preferences.strip()) or budget is not None or weekday_cooking_limit is not None
     if has_restrictions:
-        key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}:{sorted(forbidden)}:{preferences.strip()}:{budget}"
+        key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}:{sorted(forbidden)}:{preferences.strip()}:{budget}:{weekday_cooking_limit}"
     else:
         key_data = f"{servings}:{json.dumps(meal_selection, sort_keys=True)}"
     return hashlib.sha256(key_data.encode()).hexdigest()
