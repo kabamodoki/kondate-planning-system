@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         ...(API_SECRET ? { "X-Api-Secret": API_SECRET } : {}),
+        "X-Forwarded-For": req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "",
       },
       body: JSON.stringify(body),
     });

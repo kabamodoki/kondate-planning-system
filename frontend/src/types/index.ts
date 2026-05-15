@@ -7,6 +7,7 @@ export interface Meal {
   name: string;
   description: string;
   estimated_cost?: number;
+  cooking_time?: number;
   ingredients: Ingredient[];
 }
 

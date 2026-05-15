@@ -32,25 +32,36 @@ def consume_budget() -> bool:
     _budget["count"] += 1
     return True
 
-# ── IP別日次制限 ──────────────────────────────────────
-GENERATE_LIMIT = 3
-REGENERATE_LIMIT = 10
+# ── IP別制限 ──────────────────────────────────────────
+GENERATE_LIMIT = 3       # 1時間ウィンドウ内
+REGENERATE_LIMIT = 5     # 日次（バジェット消費なし）
 
 _ip_counters: dict[str, dict] = {}
 
-def _get_ip_counter(ip: str) -> dict:
-    today = _today_jst()
-    if ip not in _ip_counters or _ip_counters[ip]["date"] != today:
-        _ip_counters[ip] = {"date": today, "generate": 0, "regenerate": 0}
-    return _ip_counters[ip]
-
-def check_and_consume_ip(ip: str, action: str) -> bool:
-    """消費できれば True、上限超えなら False。action は 'generate' or 'regenerate'"""
-    counter = _get_ip_counter(ip)
-    limit = GENERATE_LIMIT if action == "generate" else REGENERATE_LIMIT
-    if counter[action] >= limit:
+def check_and_consume_generate_ip(ip: str) -> bool:
+    """生成: 1時間ウィンドウで3回まで。消費できれば True、超過なら False"""
+    now = datetime.now(JST)
+    entry = _ip_counters.setdefault(ip, {})
+    gen = entry.setdefault("generate", {"count": 0, "window_start": now})
+    if now - gen["window_start"] >= timedelta(hours=1):
+        gen["count"] = 0
+        gen["window_start"] = now
+    if gen["count"] >= GENERATE_LIMIT:
         return False
-    counter[action] += 1
+    gen["count"] += 1
+    return True
+
+def check_and_consume_regenerate_ip(ip: str) -> bool:
+    """再生成: 日次で5回まで。消費できれば True、超過なら False"""
+    today = _today_jst()
+    entry = _ip_counters.setdefault(ip, {})
+    regen = entry.setdefault("regenerate", {"count": 0, "date": today})
+    if regen["date"] != today:
+        regen["count"] = 0
+        regen["date"] = today
+    if regen["count"] >= REGENERATE_LIMIT:
+        return False
+    regen["count"] += 1
     return True
 
 # ── 結果キャッシュ ────────────────────────────────────
@@ -86,7 +97,6 @@ def add_to_community(plan: dict):
     now = datetime.now(JST)
     plan["generatedAt"] = now.isoformat()
     _community.appendleft(plan)
-    # 件数上限
     while len(_community) > COMMUNITY_MAX:
         _community.pop()
 

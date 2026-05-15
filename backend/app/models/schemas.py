@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 
 
@@ -11,6 +11,7 @@ class Meal(BaseModel):
     name: str
     description: str
     estimated_cost: Optional[int] = None
+    cooking_time: Optional[int] = None
     ingredients: List[Ingredient]
 
 
@@ -60,11 +61,18 @@ class MealSelection(BaseModel):
 # Request / Response schemas
 
 class GenerateMealPlanRequest(BaseModel):
-    servings: int = 2
+    servings: int = Field(default=2, ge=1, le=10)
     meal_selection: MealSelection = MealSelection()
-    forbidden_ingredients: List[str] = []
-    preferences: str = ""
-    budget: Optional[int] = None
+    forbidden_ingredients: List[str] = Field(default=[])
+    preferences: str = Field(default="", max_length=300)
+    budget: Optional[int] = Field(default=None, ge=0, le=100000)
+
+    @field_validator("forbidden_ingredients")
+    @classmethod
+    def validate_forbidden(cls, v: List[str]) -> List[str]:
+        if len(v) > 20:
+            raise ValueError("forbidden_ingredients は最大20件です")
+        return [item[:50] for item in v]
 
 
 class GenerateMealPlanResponse(BaseModel):
@@ -74,9 +82,9 @@ class GenerateMealPlanResponse(BaseModel):
 class RegenerateMealRequest(BaseModel):
     day: str
     meal_type: str
-    servings: int = 2
+    servings: int = Field(default=2, ge=1, le=10)
     current_plan: MealPlan
-    budget: Optional[int] = None
+    budget: Optional[int] = Field(default=None, ge=0, le=100000)
 
 
 class RegenerateMealResponse(BaseModel):

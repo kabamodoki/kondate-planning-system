@@ -2,7 +2,7 @@ export default function TermsPage() {
   return (
     <div className="max-w-lg mx-auto">
       <h1 className="text-2xl font-extrabold text-warm-900 mb-2">利用規約</h1>
-      <p className="text-xs text-warm-400 mb-8">最終更新: 2026年5月14日</p>
+      <p className="text-xs text-warm-400 mb-8">最終更新: 2026年5月16日</p>
 
       <div className="space-y-6 text-sm text-warm-700 leading-relaxed">
         <section>
@@ -59,7 +59,25 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-warm-900 mb-2">6. 規約の変更</h2>
+          <h2 className="font-bold text-warm-900 mb-2">6. AIサービスの利用について</h2>
+          <p>
+            本サービスは献立の生成に Google の Gemini API を使用しています。献立生成時に入力された情報（人数・禁止食材・好み・予算）は Google のサーバーに送信され、AI による処理が行われます。
+            送信されるデータに個人情報は含まれず、生成結果の取得のみを目的とします。
+            Google の AI サービスの利用規約・プライバシーポリシーについては
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-terra underline mx-1"
+            >
+              Google プライバシーポリシー
+            </a>
+            をご確認ください。
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-warm-900 mb-2">7. 規約の変更</h2>
           <p>
             本規約は予告なく変更する場合があります。変更後も本サービスを利用した場合、変更後の規約に同意したものとみなします。
           </p>
