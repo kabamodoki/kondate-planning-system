@@ -7,7 +7,7 @@ from app.models.schemas import (
     RegenerateMealRequest,
     RegenerateMealResponse,
 )
-from app.services import gemini_service, community_service
+from app.services import gemini_service, community_service, budget_service
 from app.services.gemini_service import GeminiAPIError
 from app import state
 
@@ -39,7 +39,7 @@ async def generate_meal_plan(req: GenerateMealPlanRequest, request: Request):
             detail={"error": "ip_limit_exceeded", "message": "1時間以内の生成上限に達しました。しばらく時間をおいてからお試しください。みんなの献立や履歴もぜひご覧ください。"},
         )
 
-    if not state.consume_budget():
+    if not budget_service.consume_budget():
         raise HTTPException(
             status_code=503,
             detail={"error": "budget_exceeded", "message": "本日の生成枠が終了しました。明日またお試しください。"},

@@ -3,17 +3,8 @@
 import { useState, useEffect } from "react";
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
-  const [value, setValue] = useState<T>(() => {
-    if (typeof window === "undefined") return initialValue;
-    try {
-      const stored = localStorage.getItem(key);
-      return stored !== null ? (JSON.parse(stored) as T) : initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
+  const [value, setValue] = useState<T>(initialValue);
 
-  // key が変わったときのみ再同期（通常は不要だが念のため）
   useEffect(() => {
     try {
       const stored = localStorage.getItem(key);

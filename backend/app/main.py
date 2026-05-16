@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import meal_plan, shopping_list, community
 from app.services.gemini_service import check_gemini_health
+from app.services import budget_service
 from app import state
 
 app = FastAPI(title="献立立案システム API", version="0.1.0")
@@ -32,5 +33,5 @@ async def health():
 
 @app.get("/api/usage")
 async def usage():
-    remaining = state.get_remaining()
+    remaining = budget_service.get_remaining()
     return {"remaining": remaining, "total": state.DAILY_API_LIMIT}

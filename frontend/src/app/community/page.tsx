@@ -41,10 +41,15 @@ export default function CommunityPage() {
       });
     });
 
+    const genDate = new Date(cp.generatedAt);
+    const dow = genDate.getDay();
+    genDate.setDate(genDate.getDate() + (dow === 0 ? -6 : 1 - dow));
+    const weekStart = genDate.toISOString().split("T")[0];
+
     const plan: MealPlan = {
       id: cp.id ?? uuidv4(),
       createdAt: cp.generatedAt,
-      weekStart: cp.generatedAt.split("T")[0],
+      weekStart,
       servings: cp.servings,
       mealSelection,
       meals: cp.meals,
